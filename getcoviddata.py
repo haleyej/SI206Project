@@ -62,22 +62,31 @@ def setUpDatabase(db_name):
 def create_db(midata, usdata):
     cur, conn = setUpDatabase('covid_deaths.db')
     cur.execute("CREATE TABLE IF NOT EXISTS covid_deaths (wk TEXT, loc TEXT, deaths NUMBER)")
+    cur.execute("CREATE TABLE IF NOT EXISTS weeks (id  INTEGER PRIMARY KEY, week TEXT UNIQUE)")
     for i in range(len(usdata.keys())):
         weeks = list(usdata.keys())
         week = weeks[i]
         deaths = usdata[week]
         loc = 'US'
-        cur.execute("INSERT INTO covid_deaths (wk,loc, deaths) VALUES (?,?,?)", (week,loc,deaths))
+        
+        cur.execute('''INSERT OR IGNORE INTO weeks (week) VALUES (?)''', (week,))
+        cur.execute('''SELECT id FROM weeks where week = (?)''', (week,))
+        week_id = cur.fetchone()[0]
+        cur.execute("INSERT INTO covid_deaths (wk,loc, deaths) VALUES (?,?,?)", (week_id,loc,deaths))
         conn.commit()
     for i in range(len(midata.keys())):
         weeks = list(midata.keys())
         week = weeks[i]
         deaths = midata[week]
         loc = 'MI'
-        cur.execute("INSERT INTO covid_deaths (wk,loc,deaths) VALUES (?,?,?)", (week,loc,deaths))
+        
+        cur.execute('''INSERT OR IGNORE INTO weeks (week) VALUES (?)''', (week,))
+        cur.execute('''SELECT id FROM weeks where week = (?)''', (week,))
+        week_id = cur.fetchone()[0]
+        cur.execute("INSERT INTO covid_deaths (wk,loc,deaths) VALUES (?,?,?)", (week_id,loc,deaths))
         conn.commit()
-"""    
+    # set primary keys ?? how to do this
+    
 midata = get_data()[0]
 usdata = get_data()[1]
 create_db(midata,usdata)
-"""
