@@ -18,7 +18,6 @@ def create_user_agent():
         user_agent="SI206",
 )
 
-
 def get_resp(sub, search, limit = 25, listing = 'top'):
     '''Get a response from the reddit API. Searches a specific subreddit for a topic. If you want to look at Reddit more generally,
     use "all" for the sub. 
@@ -32,6 +31,8 @@ def get_resp(sub, search, limit = 25, listing = 'top'):
         return('Invalid URL, please try again')
 
 def get_data(sub, search, start_date, limit = 25, listing = 'top', data_dict = {'search':[]}):
+    '''Takes in a bunch of search parameters, returns a dictionary. Calls get_resp
+    Keys include search (list with one item, the search term used to get the response) and a dictionary of data for a week'''
     data_dict['search'].append(search)
     resp = get_resp(sub, search, limit, listing)
     tot_upvotes = 0
@@ -61,6 +62,7 @@ def get_data(sub, search, start_date, limit = 25, listing = 'top', data_dict = {
 
 
 def find_week(reddit_time):
+    '''Uses datetime modules to find the week from epoch time (reddit api returns epoch time) '''
     real_time = datetime.datetime.utcfromtimestamp(reddit_time).replace(tzinfo=datetime.timezone.utc)
     week = real_time - timedelta(days=real_time.weekday())
     week = str(week).split()[0]
@@ -69,6 +71,7 @@ def find_week(reddit_time):
 
     
 def create_searches_database(data_base_name):
+    '''Creates a database'''
     path = os.path.dirname(os.path.abspath(__file__))
     conn = sqlite3.connect(path+'/'+data_base_name)
     cur = conn.cursor()
@@ -76,6 +79,8 @@ def create_searches_database(data_base_name):
 
 
 def fill_searches_database(search, start_month, start_day, start_year, cur, conn, sub = 'all', limit = 25, listing = 'top', runs = 1):
+    '''This code takes in a bunch of search parameters. Basically everything happens in this function to get the data and fill the database
+    Calls get_data, does NOT call create_searches_database(), that function needs to be called before'''
     print("Putting information in database for search", search, "in the subreddit r/", sub)
     start_date = datetime.datetime(start_year, start_month, start_day)
     cur.execute('''CREATE TABLE IF NOT EXISTS Reddit (week TEXT, search INTEGER, sampled_posts INTEGER,
@@ -111,28 +116,22 @@ def main():
     print('executing')
     cur, conn = create_searches_database('Reddit.db')
 
-    #fill_searches_database('COVID', 3, 15, 2020, cur, conn)
-   # fill_searches_database('Coronavirus', 4, 15, 2021, cur, conn)
-    #fill_searches_database('COVID', 3, 15, 2020, cur, conn, listing = 'controversial')
-    #fill_searches_database('Vaccine', 3, 15, 2020, cur, conn)
-    #fill_searches_database('lockdown', 3, 15, 2020, cur, conn)
-    #fill_searches_database('lockdown', 3, 15, 2020, cur, conn, listing = 'controversial')
-    #fill_searches_database('quarantine', 3, 15, 2020, cur, conn)
-    #fill_searches_database('Dr.Fauci', 3, 15, 2020, cur, conn)
-    #fill_searches_database('World Health Organization', 3, 15, 2020, cur, conn)
+    #sample searches to fill database
+    fill_searches_database('COVID', 3, 15, 2020, cur, conn)
+    fill_searches_database('Coronavirus', 4, 15, 2021, cur, conn)
+    fill_searches_database('COVID', 3, 15, 2020, cur, conn, listing = 'controversial')
+    fill_searches_database('Vaccine', 3, 15, 2020, cur, conn)
+    fill_searches_database('lockdown', 3, 15, 2020, cur, conn)
+    fill_searches_database('lockdown', 3, 15, 2020, cur, conn, listing = 'controversial')
+    fill_searches_database('quarantine', 3, 15, 2020, cur, conn)
+    fill_searches_database('Dr.Fauci', 3, 15, 2020, cur, conn)
+    fill_searches_database('World Health Organization', 3, 15, 2020, cur, conn)
     fill_searches_database("COVID", 3, 15, 20, cur, conn, sub = 'Michigan')
     fill_searches_database("COVID", 3, 15, 20, cur, conn, sub = 'Michigan', listing = 'controversial')
     fill_searches_database("Anti mask", 3, 15, 20, cur, conn, sub = 'news', listing = 'controversial')
 
     conn.close()
 
-
-    #start_year = 2020
-    #start_month = 3
-    #start_day = 15
-    #start_date = datetime.datetime(start_year, start_month, start_day)
-    #x = get_data('all', 'COVID', start_date=start_date)
-    #print(list(x.keys())[1:])
 
 
 
