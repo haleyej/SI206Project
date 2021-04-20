@@ -120,7 +120,7 @@ def fill_database(unemployment_dict, totals_list, cur, conn):
         #adds information into unemployment rates table
         cur.execute('''INSERT OR IGNORE INTO unemployment_rates (week, initial_nsa_claims, total_claims) VALUES (?, ?, ?)''', (week_num, unemployment_claim_num, total))
     
-    print("Finished adding data")
+    print("Finished adding data")a
     conn.commit()
 
 
