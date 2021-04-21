@@ -86,7 +86,9 @@ def create_db(midata, usdata):
         cur.execute("INSERT INTO covid_deaths (wk,loc,deaths) VALUES (?,?,?)", (week_id,loc,deaths))
         conn.commit()
     # set primary keys ?? how to do this
-    
-midata = get_data()[0]
-usdata = get_data()[1]
-create_db(midata,usdata)
+def main(): 
+    midata = get_data()[0]
+    usdata = get_data()[1]
+    create_db(midata,usdata)
+if __name__ =="__main__":
+    main()
