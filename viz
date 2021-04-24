@@ -1,0 +1,20 @@
+import matplotlib
+import  matplotlib.pyplot as plt 
+
+"""
+data from transportation:
+# of people staying home
+# of people not staying home
+ratio of those two ^^
+
+data from unemployment: 
+new unemployment cases MI
+total unemployment cases MI
+
+new unemployment cases US
+total unemployment cases US
+
+data from covid deaths:
+covid deaths MI
+covid deaths US
+"""
