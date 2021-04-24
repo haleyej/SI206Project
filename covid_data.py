@@ -187,7 +187,7 @@ def create_db(midata, usdata):
         cur.execute('''INSERT OR IGNORE INTO weeks (week) VALUES (?)''', (week,))
         cur.execute('''SELECT id FROM weeks where week = (?)''', (week,))
         week_id = cur.fetchone()[0]
-        cur.execute("INSERT INTO covid_deaths (i, wk,loc, deaths) VALUES (?,?,?,?)", (i, week_id,loc_id,deaths))
+        cur.execute("INSERT OR IGNORE INTO covid_deaths (i, wk,loc, deaths) VALUES (?,?,?,?)", (i, week_id,loc_id,deaths))
         conn.commit()
     primary_key = len(usdata.keys())
     for i in range(len(midata.keys())):
@@ -202,7 +202,7 @@ def create_db(midata, usdata):
         cur.execute('''INSERT OR IGNORE INTO weeks (week) VALUES (?)''', (week,))
         cur.execute('''SELECT id FROM weeks where week = (?)''', (week,))
         week_id = cur.fetchone()[0]
-        cur.execute("INSERT INTO covid_deaths (i, wk,loc,deaths) VALUES (?,?,?,?)", (primary_key, week_id,loc_id,deaths))
+        cur.execute("INSERT OR IGNORE INTO covid_deaths (i, wk,loc,deaths) VALUES (?,?,?,?)", (primary_key, week_id,loc_id,deaths))
         conn.commit()
     # set primary keys ?? how to do this
 
@@ -264,12 +264,13 @@ def get_national_initial_nsa_claims():
     return nsa_list
 
 def get_mich_initial_nsa_claims():
-    with open("mich_unemployment.html") as f:
-        soup = BeautifulSoup(f, "html.parser")
 
     #Gets weekly initial not seasonally adjusted jobless claims from week of March 14, 2020 to March 13, 2021. 
     #Function will return a list of these numbers per week
     #List returns numbers chronologically from March 2020 to may 2020
+
+    with open("mich_unemployment.html") as f:
+        soup = BeautifulSoup(f, "html.parser")
 
     nsa_list = []
 
@@ -292,6 +293,7 @@ def get_national_weekly_cumulative_total():
     #Function gets a weekly cumulative total of initial NSA unemployment claims as weeks go on
     #Function will return a list of the cumulative total per week 
     #List returns numbers chronologically from March 2020 to may 2020
+
     total = 0 
 
     cumulative_totals = []
@@ -307,6 +309,7 @@ def get_mich_weekly_cumulative_total():
     #Function gets a weekly cumulative total of initial Michigan NSA unemployment claims as weeks go on
     #Function will return a list of the cumulative total per week 
     #List returns numbers chronologically from March 2020 to may 2020
+
     total = 0 
 
     cumulative_totals = []
@@ -347,6 +350,7 @@ def fill_database(nat_unemployment_dict, mich_unemployment_dict, nat_totals_list
     #cur.execute('''CREATE TABLE IF NOT EXISTS weeks (id INTEGER PRIMARY KEY, week TEXT UNIQUE)''')
 
     #creates table of unemployment rates
+
     cur.execute('''CREATE TABLE IF NOT EXISTS unemployment_rates (i INTEGER PRIMARY KEY, week INTEGER, loc INTEGER, initial_nsa_claims INTEGER, total_claims INTEGER)''')
     
 
@@ -355,20 +359,21 @@ def fill_database(nat_unemployment_dict, mich_unemployment_dict, nat_totals_list
 
         #creates variables to insert into table
         week_key = weeks[x]
-        unemployment_claim_num = nat_unemployment_dict[week_key]
+
+        nat_unemployment_claim_num = nat_unemployment_dict[week_key]
+
         nat_total = nat_totals_list[x]
+
         week_num = x + 1
 
-        loc = "MI"
-        #get location id
-        cur.execute('''SELECT id FROM locs where loc = (?)''', (loc,))
-        loc_id = cur.fetchone()[0]
+        loc = "1"
 
         #adds information into weeks table
         cur.execute('''INSERT OR IGNORE INTO Weeks (id, week) VALUES (?, ?)''', (week_num, week_key))
 
         #adds information into unemployment rates table
-        cur.execute('''INSERT OR IGNORE INTO unemployment_rates (i, week, loc, initial_nsa_claims, total_claims) VALUES (?, ?, ?, ?, ?)''', (x, week_num, loc_id, unemployment_claim_num, nat_total))
+        cur.execute('''INSERT OR IGNORE INTO unemployment_rates (week, loc, initial_nsa_claims, total_claims) VALUES (?, ?, ?, ?)''', (week_num, loc, nat_unemployment_claim_num, nat_total))
+
 
     for x in range(len(mich_unemployment_dict.keys())):
 
