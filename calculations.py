@@ -220,7 +220,7 @@ def calculate_mich_unemployment_percent_change(cur, conn):
 
     cur.execute('''SELECT unemployment_rates.initial_nsa_claims
                     FROM unemployment_rates
-                    WHERE unemployment_rates.loc = "National" ''')
+                    WHERE unemployment_rates.loc = "1" ''')
     data = cur.fetchall()
     conn.commit()
 
