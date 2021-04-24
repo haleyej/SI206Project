@@ -351,8 +351,8 @@ def fill_database(nat_unemployment_dict, mich_unemployment_dict, nat_totals_list
 
     #creates table of unemployment rates
 
-    cur.execute('''CREATE TABLE IF NOT EXISTS unemployment_rates (i INTEGER PRIMARY KEY, week INTEGER, loc INTEGER, initial_nsa_claims INTEGER, total_claims INTEGER)''')
-    
+    cur.execute('''CREATE TABLE IF NOT EXISTS unemployment_rates (i INTEGER, week INTEGER, loc INTEGER, initial_nsa_claims INTEGER, total_claims INTEGER)''')
+
 
     for x in range(len(nat_unemployment_dict.keys())):
         weeks = list(nat_unemployment_dict.keys())
@@ -366,13 +366,21 @@ def fill_database(nat_unemployment_dict, mich_unemployment_dict, nat_totals_list
 
         week_num = x + 1
 
-        loc = "1"
+        loc = "National"
+
+        cur.execute('''SELECT id FROM locs where loc = (?)''', (loc,))
+
+        loc_id = cur.fetchone()[0]
+
+        
+
 
         #adds information into weeks table
         cur.execute('''INSERT OR IGNORE INTO Weeks (id, week) VALUES (?, ?)''', (week_num, week_key))
 
+
         #adds information into unemployment rates table
-        cur.execute('''INSERT OR IGNORE INTO unemployment_rates (week, loc, initial_nsa_claims, total_claims) VALUES (?, ?, ?, ?)''', (week_num, loc, nat_unemployment_claim_num, nat_total))
+        cur.execute('''INSERT OR IGNORE INTO unemployment_rates (week, loc, initial_nsa_claims, total_claims) VALUES (?, ?, ?, ?)''', (week_num, loc_id, nat_unemployment_claim_num, nat_total))
 
 
     for x in range(len(mich_unemployment_dict.keys())):
@@ -430,6 +438,7 @@ def main():
 
     weekly_national_umemployment_claims_dict = make_national_dict()
     weekly_mich_umemployment_claims_dict = make_mich_dict()
+    print(weekly_mich_umemployment_claims_dict)
 
     cumulative_national_claims_list = get_national_weekly_cumulative_total()
     cumulative_mich_claims_list = get_mich_weekly_cumulative_total()
