@@ -2,7 +2,7 @@ import matplotlib
 import  matplotlib.pyplot as plt 
 import sqlite3
 import os
-
+import numpy as np
 """
 data from transportation:
 # of people staying home
@@ -31,26 +31,21 @@ results = cur.execute('SELECT at_home FROM transport WHERE location_id =1').fetc
 for num in results:
     num = num[0]
     USathome.append(num)
-
-
 USnotathome = []
 results = cur.execute('SELECT not_at_home FROM transport WHERE location_id =1').fetchall()
 for num in results:
     num = num[0]
     USnotathome.append(num)
-
 USathomeratio=[]
 results = cur.execute('SELECT ratio_at_home FROM transport WHERE location_id =1').fetchall()
 for num in results:
     num = num[0]
     USathomeratio.append(num)
-
 MIathome=[]
 results = cur.execute('SELECT at_home FROM transport WHERE location_id =2').fetchall()
 for num in results:
     num = num[0]
     MIathome.append(num)
-
 MInotathome = []
 results = cur.execute('SELECT not_at_home FROM transport WHERE location_id =2').fetchall()
 for num in results:
@@ -87,7 +82,6 @@ for num in results:
     num = num[0]
     total_unemploy_US.append(num)
 
-
 #-------------------------------------------------COVID DEATHS-------------------------------------------------
 covid_deaths_MI=[]
 results = cur.execute('SELECT deaths FROM covid_deaths WHERE loc =2').fetchall()
@@ -101,3 +95,24 @@ for num in results:
     num = num[0]
     covid_deaths_US.append(num)
 #-------------------------------------------------VISUALIZATIONS-------------------------------------------------
+weeks =[]
+count =0
+for i in range(52):
+    count +=1
+    weeks.append(count)
+
+#1 - US vs MI athome ratio
+fig,ax = plt.subplots()
+x = np.array(weeks)
+y1 = np.array(MIathomeratio)
+y2 = np.array(USathomeratio)
+ax.plot(x,y1)
+ax.plot(x, y2, color = 'b')
+ax.set_xlabel('weeks')
+ax.set_ylabel('ratio of # people at-home to # not at-home')
+ax.set_title('Ratios of people at-home vs not in US and MI')
+ax.grid()
+plt.show()
+#2 new unemployment rates & covid deaths
+
+#3 - at home ratio & covid deaths 
