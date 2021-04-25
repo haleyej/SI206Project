@@ -173,6 +173,8 @@ def calculate_mich_home_percent_change(cur, conn):
 
     cur.execute('''SELECT transport.at_home
                     FROM transport
+                    JOIN covid_deaths
+                    ON transport.week_id = covid_deaths.wk
                     WHERE transport.location_id = "2" ''')
     data = cur.fetchall()
     conn.commit()
