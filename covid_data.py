@@ -223,7 +223,37 @@ def get_week_dates():
     rows = anchor.find_all('tr')
 
     #rows is sliced to get data from specified dates our group decided upon
-    for row in rows[13:-42]:
+    for row in rows[13:38]:
+
+        header = row.find('td')['headers']
+        date = header[0]
+
+        #broke up the date into year, month, and day for reformatting purposes
+        year  = date[-4:]
+        day = date[3:5]
+        month = date[:2]
+
+        #this formats the date given into a format our group agreed upon
+        formatted_date = str(year) + '-' + str(month) + '-' + str(day)
+
+        date_list.append(formatted_date)
+
+    for row in rows[38:63]:
+
+        header = row.find('td')['headers']
+        date = header[0]
+
+        #broke up the date into year, month, and day for reformatting purposes
+        year  = date[-4:]
+        day = date[3:5]
+        month = date[:2]
+
+        #this formats the date given into a format our group agreed upon
+        formatted_date = str(year) + '-' + str(month) + '-' + str(day)
+
+        date_list.append(formatted_date)
+
+    for row in rows[63:-42]:
 
         header = row.find('td')['headers']
         date = header[0]
@@ -252,7 +282,25 @@ def get_national_initial_nsa_claims():
     rows = anchor.find_all('tr')
 
     #rows is sliced to get data from specified dates our group decided upon
-    for row in rows[13:-42]:
+    for row in rows[13:38]:
+
+        nsa_initial_claim_num = row.find('td').text
+
+        #this gets rid of commas in numbers so I can convert the strings into integers without error
+        num = nsa_initial_claim_num.replace(',', '')  
+
+        nsa_list.append(int(num))
+
+    for row in rows[38:63]:
+
+        nsa_initial_claim_num = row.find('td').text
+
+        #this gets rid of commas in numbers so I can convert the strings into integers without error
+        num = nsa_initial_claim_num.replace(',', '')  
+
+        nsa_list.append(int(num))
+
+    for row in rows[63:-42]:
 
         nsa_initial_claim_num = row.find('td').text
 
@@ -278,7 +326,25 @@ def get_mich_initial_nsa_claims():
     rows = anchor.find_all('tr')
 
     #rows is sliced to get data from specified dates our group decided upon
-    for row in rows[12:-4]:
+    for row in rows[12:37]:
+
+        nsa_initial_claim_num = row.find('td').text
+
+        #this gets rid of commas in numbers so I can convert the strings into integers without error
+        num = nsa_initial_claim_num.replace(',', '')  
+
+        nsa_list.append(int(num))
+
+    for row in rows[37:62]:
+
+        nsa_initial_claim_num = row.find('td').text
+
+        #this gets rid of commas in numbers so I can convert the strings into integers without error
+        num = nsa_initial_claim_num.replace(',', '')  
+
+        nsa_list.append(int(num))
+
+    for row in rows[62:-4]:
 
         nsa_initial_claim_num = row.find('td').text
 
@@ -438,7 +504,9 @@ def main():
 
     weekly_national_umemployment_claims_dict = make_national_dict()
     weekly_mich_umemployment_claims_dict = make_mich_dict()
-    print(weekly_mich_umemployment_claims_dict)
+    print(len(get_mich_initial_nsa_claims()))
+    print(len(get_national_initial_nsa_claims()))
+
 
     cumulative_national_claims_list = get_national_weekly_cumulative_total()
     cumulative_mich_claims_list = get_mich_weekly_cumulative_total()
