@@ -224,7 +224,37 @@ def get_week_dates():
     rows = anchor.find_all('tr')
 
     #rows is sliced to get data from specified dates our group decided upon
-    for row in rows[13:-42]:
+    for row in rows[13:38]:
+
+        header = row.find('td')['headers']
+        date = header[0]
+
+        #broke up the date into year, month, and day for reformatting purposes
+        year  = date[-4:]
+        day = date[3:5]
+        month = date[:2]
+
+        #this formats the date given into a format our group agreed upon
+        formatted_date = str(year) + '-' + str(month) + '-' + str(day)
+
+        date_list.append(formatted_date)
+
+    for row in rows[38:63]:
+
+        header = row.find('td')['headers']
+        date = header[0]
+
+        #broke up the date into year, month, and day for reformatting purposes
+        year  = date[-4:]
+        day = date[3:5]
+        month = date[:2]
+
+        #this formats the date given into a format our group agreed upon
+        formatted_date = str(year) + '-' + str(month) + '-' + str(day)
+
+        date_list.append(formatted_date)
+
+    for row in rows[63:-42]:
 
         header = row.find('td')['headers']
         date = header[0]
@@ -253,7 +283,25 @@ def get_national_initial_nsa_claims():
     rows = anchor.find_all('tr')
 
     #rows is sliced to get data from specified dates our group decided upon
-    for row in rows[13:-42]:
+    for row in rows[13:38]:
+
+        nsa_initial_claim_num = row.find('td').text
+
+        #this gets rid of commas in numbers so I can convert the strings into integers without error
+        num = nsa_initial_claim_num.replace(',', '')  
+
+        nsa_list.append(int(num))
+
+    for row in rows[38:63]:
+
+        nsa_initial_claim_num = row.find('td').text
+
+        #this gets rid of commas in numbers so I can convert the strings into integers without error
+        num = nsa_initial_claim_num.replace(',', '')  
+
+        nsa_list.append(int(num))
+
+    for row in rows[63:-42]:
 
         nsa_initial_claim_num = row.find('td').text
 
@@ -265,12 +313,13 @@ def get_national_initial_nsa_claims():
     return nsa_list
 
 def get_mich_initial_nsa_claims():
-    with open("mich_unemployment.html") as f:
-        soup = BeautifulSoup(f, "html.parser")
 
     #Gets weekly initial not seasonally adjusted jobless claims from week of March 14, 2020 to March 13, 2021. 
     #Function will return a list of these numbers per week
     #List returns numbers chronologically from March 2020 to may 2020
+
+    with open("mich_unemployment.html") as f:
+        soup = BeautifulSoup(f, "html.parser")
 
     nsa_list = []
 
@@ -278,7 +327,25 @@ def get_mich_initial_nsa_claims():
     rows = anchor.find_all('tr')
 
     #rows is sliced to get data from specified dates our group decided upon
-    for row in rows[12:-4]:
+    for row in rows[12:37]:
+
+        nsa_initial_claim_num = row.find('td').text
+
+        #this gets rid of commas in numbers so I can convert the strings into integers without error
+        num = nsa_initial_claim_num.replace(',', '')  
+
+        nsa_list.append(int(num))
+
+    for row in rows[37:62]:
+
+        nsa_initial_claim_num = row.find('td').text
+
+        #this gets rid of commas in numbers so I can convert the strings into integers without error
+        num = nsa_initial_claim_num.replace(',', '')  
+
+        nsa_list.append(int(num))
+
+    for row in rows[62:-4]:
 
         nsa_initial_claim_num = row.find('td').text
 
