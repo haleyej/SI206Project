@@ -15,7 +15,6 @@ import plotly.express as px
 ##PART 1: TRANSPORT DATA
 client = Socrata("data.bts.gov", None)
 
-
 def get_resp(level, date, state_code = 'MI'):
     '''Takes in three parameters and returns a list of dictionaries with data on trips by distance from the Bureau 
         of Transportation Statistics. 
@@ -32,7 +31,7 @@ def get_resp(level, date, state_code = 'MI'):
 
 def increment_time(start_date):
     '''Takes in a DateTime object. Increments it by 7 days to jump ahead to the next week. 
-    Returns the DateTime object'''
+    Returns the incremented DateTime object'''
     next_week = start_date + timedelta(days=7)
     return next_week
 
@@ -48,8 +47,9 @@ def build_national_lst(start_date):
     return national_lst
 
 def build_state_lst(start_date, state_code = 'MI'):
-    '''Takes in a start date and state code. Calls the get_resp function 53 times to get data for a complete year.
-    Appends results from each call to get_resp to a list and returns a list of lists of dictionaries.'''
+    '''Takes in a start date and state code (Michigan is the defaul value). Calls the get_resp function 53 times to get 
+    a data dictionary for a complete year. Appends results from each call to get_resp to a list.
+    Returns a list of lists of dictionaries.'''
     state_lst = []
     date = start_date
     for i in range(53):
@@ -59,7 +59,7 @@ def build_state_lst(start_date, state_code = 'MI'):
     return state_lst
 
 def setUpDatabase(db_name):
-    '''Takes in the name of a database. Creates a database and returns a cur and conn'''
+    '''Takes in the name of a database. Creates the database and returns a cur and conn'''
     path = os.path.dirname(os.path.abspath(__file__))
     conn = sqlite3.connect(path+'/'+db_name)
     cur = conn.cursor()
@@ -67,8 +67,9 @@ def setUpDatabase(db_name):
 
 
 def create_transport_database(national_lst, state_lst):
-    '''Takes in a list of state data and national data. Extracts values from the list, 
-    changes them to floating points and inserts values into a table. Does not return anything'''
+    '''Takes in a list of dictionaries of state data and list of dictionaries of national data. 
+    Extracts values from the list, conver them from strings to floating points, inserts values 
+    into a table and commits the changes. Does not return anything'''
     cur, conn = setUpDatabase('full_data.db')
     cur.execute('''CREATE TABLE IF NOT EXISTS transport (i INTEGER PRIMARY KEY UNIQUE, week_id INTEGER, location_id INTEGER, at_home INTEGER,
                 not_at_home INTEGER, ratio_at_home INTEGER, one_mile_trips INTEGER, one_to_three_mile_trips INTEGER,
@@ -223,37 +224,7 @@ def get_week_dates():
     rows = anchor.find_all('tr')
 
     #rows is sliced to get data from specified dates our group decided upon
-    for row in rows[13:38]:
-
-        header = row.find('td')['headers']
-        date = header[0]
-
-        #broke up the date into year, month, and day for reformatting purposes
-        year  = date[-4:]
-        day = date[3:5]
-        month = date[:2]
-
-        #this formats the date given into a format our group agreed upon
-        formatted_date = str(year) + '-' + str(month) + '-' + str(day)
-
-        date_list.append(formatted_date)
-
-    for row in rows[38:63]:
-
-        header = row.find('td')['headers']
-        date = header[0]
-
-        #broke up the date into year, month, and day for reformatting purposes
-        year  = date[-4:]
-        day = date[3:5]
-        month = date[:2]
-
-        #this formats the date given into a format our group agreed upon
-        formatted_date = str(year) + '-' + str(month) + '-' + str(day)
-
-        date_list.append(formatted_date)
-
-    for row in rows[63:-42]:
+    for row in rows[13:-42]:
 
         header = row.find('td')['headers']
         date = header[0]
@@ -282,25 +253,7 @@ def get_national_initial_nsa_claims():
     rows = anchor.find_all('tr')
 
     #rows is sliced to get data from specified dates our group decided upon
-    for row in rows[13:38]:
-
-        nsa_initial_claim_num = row.find('td').text
-
-        #this gets rid of commas in numbers so I can convert the strings into integers without error
-        num = nsa_initial_claim_num.replace(',', '')  
-
-        nsa_list.append(int(num))
-
-    for row in rows[38:63]:
-
-        nsa_initial_claim_num = row.find('td').text
-
-        #this gets rid of commas in numbers so I can convert the strings into integers without error
-        num = nsa_initial_claim_num.replace(',', '')  
-
-        nsa_list.append(int(num))
-
-    for row in rows[63:-42]:
+    for row in rows[13:-42]:
 
         nsa_initial_claim_num = row.find('td').text
 
@@ -312,13 +265,12 @@ def get_national_initial_nsa_claims():
     return nsa_list
 
 def get_mich_initial_nsa_claims():
+    with open("mich_unemployment.html") as f:
+        soup = BeautifulSoup(f, "html.parser")
 
     #Gets weekly initial not seasonally adjusted jobless claims from week of March 14, 2020 to March 13, 2021. 
     #Function will return a list of these numbers per week
     #List returns numbers chronologically from March 2020 to may 2020
-
-    with open("mich_unemployment.html") as f:
-        soup = BeautifulSoup(f, "html.parser")
 
     nsa_list = []
 
@@ -326,25 +278,7 @@ def get_mich_initial_nsa_claims():
     rows = anchor.find_all('tr')
 
     #rows is sliced to get data from specified dates our group decided upon
-    for row in rows[12:37]:
-
-        nsa_initial_claim_num = row.find('td').text
-
-        #this gets rid of commas in numbers so I can convert the strings into integers without error
-        num = nsa_initial_claim_num.replace(',', '')  
-
-        nsa_list.append(int(num))
-
-    for row in rows[37:62]:
-
-        nsa_initial_claim_num = row.find('td').text
-
-        #this gets rid of commas in numbers so I can convert the strings into integers without error
-        num = nsa_initial_claim_num.replace(',', '')  
-
-        nsa_list.append(int(num))
-
-    for row in rows[62:-4]:
+    for row in rows[12:-4]:
 
         nsa_initial_claim_num = row.find('td').text
 
@@ -359,7 +293,6 @@ def get_national_weekly_cumulative_total():
     #Function gets a weekly cumulative total of initial NSA unemployment claims as weeks go on
     #Function will return a list of the cumulative total per week 
     #List returns numbers chronologically from March 2020 to may 2020
-
     total = 0 
 
     cumulative_totals = []
@@ -375,7 +308,6 @@ def get_mich_weekly_cumulative_total():
     #Function gets a weekly cumulative total of initial Michigan NSA unemployment claims as weeks go on
     #Function will return a list of the cumulative total per week 
     #List returns numbers chronologically from March 2020 to may 2020
-
     total = 0 
 
     cumulative_totals = []
@@ -416,38 +348,28 @@ def fill_database(nat_unemployment_dict, mich_unemployment_dict, nat_totals_list
     #cur.execute('''CREATE TABLE IF NOT EXISTS weeks (id INTEGER PRIMARY KEY, week TEXT UNIQUE)''')
 
     #creates table of unemployment rates
-
-    cur.execute('''CREATE TABLE IF NOT EXISTS unemployment_rates (i INTEGER, week INTEGER, loc INTEGER, initial_nsa_claims INTEGER, total_claims INTEGER)''')
-
+    cur.execute('''CREATE TABLE IF NOT EXISTS unemployment_rates (i INTEGER PRIMARY KEY, week INTEGER, loc INTEGER, initial_nsa_claims INTEGER, total_claims INTEGER)''')
+    
 
     for x in range(len(nat_unemployment_dict.keys())):
         weeks = list(nat_unemployment_dict.keys())
 
         #creates variables to insert into table
         week_key = weeks[x]
-
-        nat_unemployment_claim_num = nat_unemployment_dict[week_key]
-
+        unemployment_claim_num = nat_unemployment_dict[week_key]
         nat_total = nat_totals_list[x]
-
         week_num = x + 1
 
-        loc = "National"
-
+        loc = "MI"
+        #get location id
         cur.execute('''SELECT id FROM locs where loc = (?)''', (loc,))
-
         loc_id = cur.fetchone()[0]
-
-        
-
 
         #adds information into weeks table
         cur.execute('''INSERT OR IGNORE INTO Weeks (id, week) VALUES (?, ?)''', (week_num, week_key))
 
-
         #adds information into unemployment rates table
-        cur.execute('''INSERT OR IGNORE INTO unemployment_rates (week, loc, initial_nsa_claims, total_claims) VALUES (?, ?, ?, ?)''', (week_num, loc_id, nat_unemployment_claim_num, nat_total))
-
+        cur.execute('''INSERT OR IGNORE INTO unemployment_rates (i, week, loc, initial_nsa_claims, total_claims) VALUES (?, ?, ?, ?, ?)''', (x, week_num, loc_id, unemployment_claim_num, nat_total))
 
     for x in range(len(mich_unemployment_dict.keys())):
 
@@ -476,45 +398,34 @@ def fill_database(nat_unemployment_dict, mich_unemployment_dict, nat_totals_list
     print("Finished adding data")
     conn.commit()
 
-def weekly_overview(cur, conn):
-    cur.execute('''SELECT covid_deaths.deaths, covid_deaths.loc, transport.location_id, transport.at_home, transport.ratio_at_home
-                FROM transport
-                JOIN covid_deaths
-                ON transport.week_id = covid_deaths.wk''')
-    data = cur.fetchall()
-    for d in data:
-        print(d)
-    conn.commit()
 
 def main():
-    #PART 1 DB
+    '''Calls functions to get data from the CDC, BTS, and Unemployment Bureau.
+    Function takes in no inputs and does not return anything''' 
+
+    #PART 1: Collect and insert mobility data
     t = datetime.datetime(2020, 3, 15)
     nats = build_national_lst(t)
     mi = build_state_lst(t)
     create_transport_database(nats, mi)
 
-    #PART 2 DB
+    #PART 2: Collect and insert COVID-19 deaths data
 
     midata = get_data()[0]
     usdata = get_data()[1]
     create_db(midata,usdata)
 
-    #PART 3 DB
+    #PART 3: Collect and insert unemployment claims data
     cur, conn = setUpDatabase('full_data.db')
 
     weekly_national_umemployment_claims_dict = make_national_dict()
     weekly_mich_umemployment_claims_dict = make_mich_dict()
-    print(len(get_mich_initial_nsa_claims()))
-    print(len(get_national_initial_nsa_claims()))
-
 
     cumulative_national_claims_list = get_national_weekly_cumulative_total()
     cumulative_mich_claims_list = get_mich_weekly_cumulative_total()
     fill_database(weekly_national_umemployment_claims_dict, weekly_mich_umemployment_claims_dict, cumulative_national_claims_list, cumulative_mich_claims_list, cur, conn)
 
-    #joining?
-    weekly_overview(cur, conn)
-
+    #Close connection
     conn.close()
 
 if __name__ == "__main__":
