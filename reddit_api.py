@@ -13,9 +13,9 @@ from datetime import date, timedelta
 
 def create_user_agent():
     reddit = praw.Reddit(
-        client_id="FRs6KuNO_pBZMg",
-        client_secret="ZEaULMdE9y9taHyX7Bavbk4HZVtZvw",
-        user_agent="SI206",
+        client_id="",
+        client_secret="",
+        user_agent="",
 )
 
 def get_resp(sub, search, limit = 25, listing = 'top'):
